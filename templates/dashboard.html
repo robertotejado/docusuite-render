@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Panel General IT/OT</h1>
+    
+    <div style="margin-bottom: 30px;">
+        <h3>Proyectos Recientes</h3>
+        <ul>
+            {% for p in proyectos %}
+                <li><strong>[{{ p['tipo'] }}]</strong> {{ p['nombre'] }} <em>({{ p['fecha_creacion'] }})</em></li>
+            {% else %}
+                <p>No hay proyectos. Ve al Editor para crear uno.</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h3>Documentación Disponible</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tr style="border-bottom: 2px solid var(--border-color);">
+                <th>ID</th>
+                <th>Título</th>
+                <th>Última Modificación</th>
+                <th>Exportar como...</th>
+            </tr>
+            {% for d in documentos %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px;">#{{ d['id'] }}</td>
+                <td>{{ d['titulo'] }}</td>
+                <td>{{ d['fecha_modificacion'] }}</td>
+                <td>
+                    <a href="/exportar/{{ d['id'] }}/pdf" class="btn" style="background:#dc2626;">PDF</a>
+                    <a href="/exportar/{{ d['id'] }}/docx" class="btn" style="background:#2563eb;">DOCX</a>
+                    <a href="/exportar/{{ d['id'] }}/md" class="btn" style="background:#16a34a;">MD</a>
+                </td>
+            </tr>
+            {% else %}
+                <tr><td colspan="4" style="padding: 10px;">No hay documentos registrados.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

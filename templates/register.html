@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 400px; margin: 100px auto; background: var(--sidebar-bg); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid var(--border-color);">
+    <h2 style="text-align: center; margin-bottom: 30px;">📝 Registro de Usuario</h2>
+    
+    <form method="POST" action="{{ url_for('main.register') }}">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px;">Nuevo Usuario</label>
+            <input type="text" name="username" required 
+                   style="width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px;">
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <label style="display: block; margin-bottom: 8px;">Contraseña</label>
+            <input type="password" name="password" required 
+                   style="width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px;">
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-weight: bold; background: #16a34a;">
+            Crear Cuenta
+        </button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px; font-size: 0.9em; color: #64748b;">
+        ¿Ya tienes cuenta? <a href="{{ url_for('main.login') }}" style="color: var(--primary); text-decoration: none;">Inicia sesión</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Gestión de Proyectos</h1>
+
+    <div style="background: var(--sidebar-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Crear Nuevo Proyecto</h3>
+        <form method="POST" action="{{ url_for('main.gestion_proyectos') }}" style="display: flex; gap: 15px; align-items: flex-end;">
+            <input type="hidden" name="action" value="crear">
+            <div>
+                <label>Nombre:</label><br>
+                <input type="text" name="nombre" required style="padding: 8px;">
+            </div>
+            <div>
+                <label>Tipo:</label><br>
+                <select name="tipo" style="padding: 8px;">
+                    <option value="IT">IT</option>
+                    <option value="OT">OT</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" style="background: #16a34a;">Guardar</button>
+        </form>
+    </div>
+
+    <h3>Proyectos Existentes</h3>
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <tr style="border-bottom: 2px solid var(--border-color);">
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+        {% for p in proyectos %}
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <form method="POST" action="{{ url_for('main.gestion_proyectos') }}">
+                <td style="padding: 10px;">{{ p['id'] }}</td>
+                <td>
+                    <select name="tipo" style="padding: 4px;">
+                        <option value="IT" {% if p['tipo'] == 'IT' %}selected{% endif %}>IT</option>
+                        <option value="OT" {% if p['tipo'] == 'OT' %}selected{% endif %}>OT</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="hidden" name="action" value="actualizar">
+                    <input type="hidden" name="id" value="{{ p['id'] }}">
+                    <input type="text" name="nombre" value="{{ p['nombre'] }}" style="padding: 4px; width: 80%;">
+                </td>
+                <td style="display: flex; gap: 10px; padding: 10px;">
+                    <button type="submit" class="btn" style="background: var(--primary);">Actualizar</button>
+            </form>
+            <form method="POST" action="{{ url_for('main.eliminar_proyecto', id=p['id']) }}" onsubmit="return confirm('¿Borrar proyecto y TODOS sus documentos asociados?');">
+                    <button type="submit" class="btn" style="background: #dc2626;">Eliminar</button>
+            </form>
+                </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

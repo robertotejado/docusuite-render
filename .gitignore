@@ -1,0 +1,17 @@
+# Contraseñas y variables de entorno (¡LO MÁS IMPORTANTE!)
+.env
+
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+
+# Archivos compilados y cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Bases de datos locales (por si acaso)
+*.sqlite3
+*.db
+docusuite.db

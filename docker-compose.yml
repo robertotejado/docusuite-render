@@ -1,0 +1,16 @@
+services:
+  docusuite-web:
+    # Le decimos que construya la imagen usando el Dockerfile de esta carpeta
+    build: .
+    # Le ponemos nombre a la imagen que va a generar
+    image: robertroof/docusuite:local
+    # Nombre del contenedor cuando esté corriendo
+    container_name: docusuite_app
+    # Mapeo de puertos (Puerto_de_tu_PC : Puerto_del_Contenedor)
+    ports:
+      - "5000:5000"
+    # ¡La magia! Le decimos que lea automáticamente tu archivo .env
+    env_file:
+      - .env
+    # Si el contenedor falla o reinicias el PC, se vuelve a levantar solo
+    restart: unless-stopped

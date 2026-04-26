@@ -1,0 +1,15 @@
+# --- Framework Core & Auth ---
+Flask==3.0.0
+Flask-Login==0.6.3
+Werkzeug==3.0.1
+
+# --- Base de Datos & Nube ---
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+cloudinary==1.36.0
+
+# --- Exportación de Documentos ---
+python-docx
+htmldocx
+xhtml2pdf
+markdownify

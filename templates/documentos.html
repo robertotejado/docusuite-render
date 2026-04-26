@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Gestión de Documentos</h1>
+    <p>Actualiza los metadatos de tus documentos, modifícalos en el editor o elimínalos.</p>
+
+    <table style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px;">
+        <tr style="border-bottom: 2px solid var(--border-color);">
+            <th>ID</th>
+            <th>Proyecto Asignado</th>
+            <th>Título del Documento</th>
+            <th>Última Modificación</th>
+            <th>Acciones</th>
+        </tr>
+        {% for d in documentos %}
+        <tr style="border-bottom: 1px solid var(--border-color);">
+            <form method="POST" action="{{ url_for('main.gestion_documentos') }}">
+                <td style="padding: 15px 10px;">#{{ d['id'] }}</td>
+                <td>
+                    <select name="id_proyecto" style="padding: 6px; max-width: 150px;">
+                        {% for p in proyectos %}
+                            <option value="{{ p['id'] }}" {% if p['id'] == d['id_proyecto'] %}selected{% endif %}>
+                                {{ p['nombre'] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="hidden" name="action" value="actualizar_meta">
+                    <input type="hidden" name="id" value="{{ d['id'] }}">
+                    <input type="text" name="titulo" value="{{ d['titulo'] }}" style="padding: 6px; width: 90%;">
+                </td>
+                <td style="font-size: 0.9em; color: #64748b;">{{ d['fecha_modificacion'] }}</td>
+                <td style="display: flex; gap: 8px; padding: 10px;">
+                    <button type="submit" class="btn" style="background: var(--primary); padding: 6px 10px;">Guardar Info</button>
+            </form>
+            
+            <a href="{{ url_for('main.editor', id_doc=d['id']) }}" class="btn" style="background: #16a34a; padding: 6px 10px;">✏️ Editar Contenido</a>
+            
+            <form method="POST" action="{{ url_for('main.eliminar_documento', id=d['id']) }}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este documento permanentemente?');">
+                <button type="submit" class="btn" style="background: #dc2626; padding: 6px 10px;">🗑️ Borrar</button>
+            </form>
+                </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="padding: 20px;">No hay documentos creados aún. <a href="{{ url_for('main.editor') }}">Crea el primero aquí.</a></td></tr>
+        {% endfor %}
+    </table>
+{% endblock %}
