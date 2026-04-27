@@ -64,6 +64,6 @@ Publicar: docker push robertroof/docusuite:v5
 Desplegar: Actualizar el tag en el panel de Render para iniciar el despliegue automático.
 
 👤 Autor
-Roberto Tejado [LinkedIn]
+Roberto Tejado [https://www.linkedin.com/in/roberto-tejado/]
 
 © 2006-Presente. Todos los derechos reservados.
