@@ -45,4 +45,23 @@
         <tr><td colspan="5" style="padding: 20px;">No hay documentos creados aún. <a href="{{ url_for('main.editor') }}">Crea el primero aquí.</a></td></tr>
         {% endfor %}
     </table>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0;">
+    
+    {% if page > 1 %}
+        <a href="{{ url_for('main.gestion_documentos', page=page-1) }}" class="btn" style="padding: 8px 15px; background: var(--sidebar-bg); border: 1px solid #ccc; text-decoration: none;">
+            &laquo; Anterior
+        </a>
+    {% endif %}
+
+    <span style="font-weight: bold; color: var(--text-color);">
+        Página {{ page }} de {{ total_pages if total_pages > 0 else 1 }}
+    </span>
+
+    {% if page < total_pages %}
+        <a href="{{ url_for('main.gestion_documentos', page=page+1) }}" class="btn" style="padding: 8px 15px; background: var(--sidebar-bg); border: 1px solid #ccc; text-decoration: none;">
+            Siguiente &raquo;
+        </a>
+    {% endif %}
+
+</div>
 {% endblock %}

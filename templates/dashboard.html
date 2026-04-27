@@ -37,5 +37,26 @@
                 <tr><td colspan="4" style="padding: 10px;">No hay documentos registrados.</td></tr>
             {% endfor %}
         </table>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
+    
+    {% if page > 1 %}
+        <a href="{{ url_for('main.dashboard', page=page-1) }}" class="btn" style="padding: 5px 15px; background: var(--sidebar-bg); border: 1px solid #ccc;">
+            &laquo; Anterior
+        </a>
+    {% endif %}
+
+    <span style="font-weight: bold;">
+        Página {{ page }} de {{ max_pages if max_pages > 0 else 1 }}
+    </span>
+
+    {% if page < max_pages %}
+        <a href="{{ url_for('main.dashboard', page=page+1) }}" class="btn" style="padding: 5px 15px; background: var(--sidebar-bg); border: 1px solid #ccc;">
+            Siguiente &raquo;
+        </a>
+    {% endif %}
+
+</div>
+        
     </div>
 {% endblock %}

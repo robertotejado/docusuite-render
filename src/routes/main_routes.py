@@ -4,6 +4,7 @@ import cloudinary
 import cloudinary.uploader
 import traceback
 import base64
+import math # Añade esto arriba del todo con tus otros imports si no lo tienes
 from urllib.parse import unquote
 
 # Importamos lo necesario de Flask
@@ -79,23 +80,50 @@ def logout():
 
 # --- DASHBOARD ---
 
+
 @main.route('/dashboard')
 @login_required 
 def dashboard():
+    # 1. Capturar la página actual (por defecto la 1)
+    page = request.args.get('page', 1, type=int)
+    per_page = 5 # Cuántos elementos quieres mostrar por página
+    offset = (page - 1) * per_page # Cálculo del salto de filas
+
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM proyectos WHERE usuario_id = %s ORDER BY fecha_creacion DESC LIMIT 5", (current_user.id,))
+    
+    # 2. Consultas con LIMIT y OFFSET
+    cur.execute("SELECT * FROM proyectos WHERE usuario_id = %s ORDER BY fecha_creacion DESC LIMIT %s OFFSET %s", (current_user.id, per_page, offset))
     proyectos_recientes = cur.fetchall()
-    cur.execute("SELECT * FROM documentos WHERE usuario_id = %s ORDER BY fecha_modificacion DESC LIMIT 5", (current_user.id,))
+    
+    cur.execute("SELECT * FROM documentos WHERE usuario_id = %s ORDER BY fecha_modificacion DESC LIMIT %s OFFSET %s", (current_user.id, per_page, offset))
     docs_recientes = cur.fetchall()
+    
+    # 3. Totales (para saber cuántas páginas hay en total)
     cur.execute("SELECT COUNT(*) as total FROM proyectos WHERE usuario_id = %s", (current_user.id,))
     total_p = cur.fetchone()['total']
+    
     cur.execute("SELECT COUNT(*) as total FROM documentos WHERE usuario_id = %s", (current_user.id,))
     total_d = cur.fetchone()['total']
+    
     cur.close()
     conn.close()
-    return render_template('dashboard.html', proyectos=proyectos_recientes, documentos=docs_recientes, total_proyectos=total_p, total_documentos=total_d)
 
+    # 4. Cálculo de páginas totales (redondeando hacia arriba)
+    total_pages_docs = math.ceil(total_d / per_page)
+    total_pages_proy = math.ceil(total_p / per_page)
+    
+    # Buscamos el máximo de páginas entre los dos para que el botón "Siguiente" funcione bien
+    max_pages = max(total_pages_docs, total_pages_proy)
+
+    return render_template('dashboard.html', 
+                           proyectos=proyectos_recientes, 
+                           documentos=docs_recientes, 
+                           total_proyectos=total_p, 
+                           total_documentos=total_d,
+                           page=page,
+                           max_pages=max_pages)
+                           
 # --- CRUD DE PROYECTOS ---
 
 @main.route('/proyectos', methods=['GET', 'POST'])
@@ -142,25 +170,53 @@ def eliminar_proyecto(id):
 def gestion_documentos():
     conn = get_db_connection()
     cur = conn.cursor()
+    
+    # --- LÓGICA DE PAGINACIÓN (10 por página) ---
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+
     if request.method == 'POST':
         accion = request.form.get('action')
         if accion == 'actualizar_meta':
             id_doc = request.form['id']
             titulo = request.form['titulo']
             id_proyecto = request.form['id_proyecto']
-            cur.execute('UPDATE documentos SET titulo = %s, id_proyecto = %s WHERE id = %s AND usuario_id = %s', (titulo, id_proyecto, id_doc, current_user.id))
+            cur.execute('UPDATE documentos SET titulo = %s, id_proyecto = %s WHERE id = %s AND usuario_id = %s', 
+                        (titulo, id_proyecto, id_doc, current_user.id))
             conn.commit()
         cur.close()
         conn.close()
-        return redirect(url_for('main.gestion_documentos'))
-    cur.execute('SELECT d.*, p.nombre as proyecto_nombre FROM documentos d LEFT JOIN proyectos p ON d.id_proyecto = p.id WHERE d.usuario_id = %s ORDER BY d.fecha_modificacion DESC', (current_user.id,))
+        return redirect(url_for('main.gestion_documentos', page=page))
+
+    # 1. Obtener los documentos con LIMIT y OFFSET
+    cur.execute('''
+        SELECT d.*, p.nombre as proyecto_nombre 
+        FROM documentos d 
+        LEFT JOIN proyectos p ON d.id_proyecto = p.id 
+        WHERE d.usuario_id = %s 
+        ORDER BY d.fecha_modificacion DESC 
+        LIMIT %s OFFSET %s
+    ''', (current_user.id, per_page, offset))
     documentos = cur.fetchall()
+
+    # 2. Obtener el total de documentos para el cálculo de páginas
+    cur.execute('SELECT COUNT(*) as total FROM documentos WHERE usuario_id = %s', (current_user.id,))
+    total_docs = cur.fetchone()['total']
+    total_pages = math.ceil(total_docs / per_page)
+
+    # 3. Obtener proyectos para los desplegables de edición
     cur.execute('SELECT * FROM proyectos WHERE usuario_id = %s', (current_user.id,))
     proyectos = cur.fetchall()
+
     cur.close()
     conn.close()
-    return render_template('documentos.html', documentos=documentos, proyectos=proyectos)
 
+    return render_template('documentos.html', 
+                           documentos=documentos, 
+                           proyectos=proyectos, 
+                           page=page, 
+                           total_pages=total_pages)
 # --- EDITOR CENTRAL CON DECODIFICACIÓN SEGURA ---
 
 @main.route('/editor', methods=['GET', 'POST'])
