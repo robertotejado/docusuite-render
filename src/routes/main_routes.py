@@ -4,8 +4,8 @@ import cloudinary
 import cloudinary.uploader
 import traceback
 import base64
-import math # Añade esto arriba del todo con tus otros imports si no lo tienes
 from urllib.parse import unquote
+import math
 
 # Importamos lo necesario de Flask
 from flask import Blueprint, render_template, request, redirect, url_for, send_file, jsonify
@@ -80,7 +80,6 @@ def logout():
 
 # --- DASHBOARD ---
 
-
 @main.route('/dashboard')
 @login_required 
 def dashboard():
@@ -123,6 +122,7 @@ def dashboard():
                            total_documentos=total_d,
                            page=page,
                            max_pages=max_pages)
+                           
                            
 # --- CRUD DE PROYECTOS ---
 
@@ -217,6 +217,7 @@ def gestion_documentos():
                            proyectos=proyectos, 
                            page=page, 
                            total_pages=total_pages)
+
 # --- EDITOR CENTRAL CON DECODIFICACIÓN SEGURA ---
 
 @main.route('/editor', methods=['GET', 'POST'])
@@ -233,21 +234,24 @@ def editor(id_doc=None):
         doc_id_form = request.form.get('id_doc') 
         
         # --- LÓGICA DE DECODIFICACIÓN PARA SALTAR EL WAF ---
-        # Recibimos el campo 'd' que viene ofuscado desde el JS
         contenido_disfrazado = request.form.get('d')
         
         try:
-            # 1. Decodificar Base64
-            decodificado_bytes = base64.b64decode(contenido_disfrazado)
-            decodificado_str = decodificado_bytes.decode('utf-8')
-            # 2. Revertir el 'escape' de URI
-            limpio = unquote(decodificado_str)
-            # 3. Invertir el texto (ya que el JS lo envió al revés)
-            contenido = limpio[::-1]
+            if contenido_disfrazado:
+                # 1. Decodificar Base64
+                decodificado_bytes = base64.b64decode(contenido_disfrazado)
+                # SOLUCIÓN ERROR DECODIFICACIÓN: errors='replace' evita que pete el servidor si hay caracteres raros
+                decodificado_str = decodificado_bytes.decode('utf-8', errors='replace')
+                # 2. Revertir el 'escape' de URI
+                limpio = unquote(decodificado_str)
+                # 3. Invertir el texto (ya que el JS lo envió al revés)
+                contenido = limpio[::-1]
+            else:
+                contenido = request.form.get('contenido_texto', '')
         except Exception as e:
             print(f"Error en decodificación: {e}")
             # Si falla, intentamos usar el campo original por si acaso
-            contenido = request.form.get('contenido_texto') or contenido_disfrazado
+            contenido = request.form.get('contenido_texto') or (contenido_disfrazado if contenido_disfrazado else '')
 
         if doc_id_form:
             cur.execute('''UPDATE documentos 

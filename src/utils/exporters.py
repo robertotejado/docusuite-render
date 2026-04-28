@@ -1,13 +1,12 @@
-# src/utils/exporters.py
 import os
+import tempfile
 from docx import Document
 from htmldocx import HtmlToDocx
 from xhtml2pdf import pisa
 from markdownify import markdownify as md
 
-# Carpeta temporal para generar las exportaciones antes de enviarlas al usuario
-EXPORT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'exports_temp')
-os.makedirs(EXPORT_DIR, exist_ok=True)
+# SOLUCIÓN PERMISOS: Usamos la carpeta temporal nativa del sistema operativo (/tmp en Linux)
+EXPORT_DIR = tempfile.gettempdir()
 
 def export_document(doc_data, formato):
     """Transforma el HTML de la BD al formato solicitado preservando estilos y autoría."""
@@ -22,9 +21,11 @@ def export_document(doc_data, formato):
 
     if formato == 'pdf':
         # Plantilla HTML inyectable para xhtml2pdf con estilos profesionales
+        # SOLUCIÓN ACENTOS PDF: Añadimos la etiqueta meta charset
         pdf_html = f"""
         <html>
         <head>
+            <meta charset="utf-8">
             <style>
                 @page {{ size: A4; margin: 2.5cm 2cm; }}
                 body {{ font-family: Helvetica, Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #333; }}

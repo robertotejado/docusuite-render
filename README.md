@@ -15,6 +15,29 @@ Optimizado para entornos de IT y Tecnología Operativa, el sistema utiliza una a
 
 ---
 
+<p align="center">
+  <img src="assets/dashboard.png" alt="Panel General IT/OT" width="800">
+</p>
+
+
+
+* **Editor Enriquecido (WYSIWYG):** Integración completa con TinyMCE, adaptado con modo claro/oscuro automático según las preferencias del sistema.
+
+<p align="center">
+  <img src="assets/nuevo_documento.png" alt="Editor de Documentos" width="800">
+</p>
+
+* **Gestión de Proyectos y Documentos:** Interfaz intuitiva para actualizar metadatos, reasignar proyectos y eliminar registros en tiempo real.
+
+<p align="center">
+  <img src="assets/gestion_documentos.png" alt="Gestión de Documentos" width="800">
+</p>
+
+* **Soporte Avanzado para Código:** Resaltado de sintaxis profesional impulsado por Prism.js, ideal para documentar comandos de `Bash`, configuraciones `YAML`, `Docker`, `JSON` y más.
+* **Gestión de Imágenes en la Nube:** Subida de imágenes "Drag & Drop" (arrastrar y soltar) integradas directamente en el editor, alojadas de forma segura y optimizada en **Cloudinary**.
+* **Base de Datos Robusta:** Arquitectura relacional utilizando **PostgreSQL** (vía Supabase) para gestionar usuarios, proyectos y versiones de documentos.
+* **Exportación Multiformato:** Capacidad para exportar la documentación final a formatos estándar (PDF, DOCX, Markdown).
+
 ## ✨ Características Principales
 
 * **Arquitectura Stateless:** Diseñada para ser desplegada en contenedores sin pérdida de datos.
