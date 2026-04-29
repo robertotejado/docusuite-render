@@ -68,7 +68,7 @@ Optimizado para entornos de IT y Tecnología Operativa, el sistema utiliza una a
 ### Pasos rápidos con Docker Compose
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/robertotejado/docusuite-render.git](https://github.com/robertotejado/docusuite-render.git)
+   git clone https://github.com/robertotejado/docusuite-render.git 
    cd docusuite-render
 
 Lanzar la aplicación:

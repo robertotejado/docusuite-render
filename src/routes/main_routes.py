@@ -252,7 +252,10 @@ def editor(id_doc=None):
             print(f"Error en decodificación: {e}")
             # Si falla, intentamos usar el campo original por si acaso
             contenido = request.form.get('contenido_texto') or (contenido_disfrazado if contenido_disfrazado else '')
-
+            
+        # ---> AÑADE ESTA LÍNEA AQUÍ PARA MATAR A LOS FANTASMAS <---
+        contenido = contenido.replace('\x00', '') 
+        
         if doc_id_form:
             cur.execute('''UPDATE documentos 
                            SET id_proyecto = %s, titulo = %s, autor = %s, contenido_texto = %s, fecha_modificacion = CURRENT_TIMESTAMP 
