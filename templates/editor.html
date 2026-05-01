@@ -29,7 +29,7 @@
                value="{% if doc_actual %}{{ doc_actual['autor'] or '' }}{% endif %}"><br>
         
         <label>Contenido del Documento:</label><br>
-        <textarea id="tinymce-editor" name="d" rows="20" style="width: 100%;">
+        <textarea id="tinymce-editor" name="contenido_texto" rows="20" style="width: 100%;">
 {% if doc_actual %}{{ doc_actual['contenido_texto'] | safe }}{% endif %}
         </textarea><br>
         
@@ -70,8 +70,10 @@ function enviarSeguro() {
     // Metemos el contenido ofuscado en el campo 'd'
     inputDisfrazado.value = contenidoBase64;
 
-    // ¡VACIAR EL CAMPO ORIGINAL! (Así el WAF de Render no ve etiquetas HTML)
+   // ¡VACIAR EL CAMPO ORIGINAL! 
     editor.value = '';
+    // ESTO ES CLAVE: Le quitamos el nombre para que el HTML crudo NO viaje a Python
+    editor.removeAttribute('name'); 
 
     console.log("Contenido disfrazado, enviando...");
     
