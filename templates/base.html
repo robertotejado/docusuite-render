@@ -20,7 +20,12 @@
             --primary: #38bdf8;
         }
         
-        body { margin: 0; display: flex; height: 100vh; background: var(--bg-color); color: var(--text-color); font-family: system-ui, -apple-system, sans-serif; transition: all 0.3s;}
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg-color); color: var(--text-color); font-family: system-ui, -apple-system, sans-serif; transition: all 0.3s;overflow: hidden; /* 🛑 ESTO MATA EL BAILE PARA SIEMPRE */}
+        /* 🛑 El asesino del baile Ska de TinyMCE */
+        .tox-tinymce-aux {
+            position: absolute !important;
+            z-index: 999999 !important;
+        }
         
         /* Layout Sidebar y Main */
         .sidebar { width: 250px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column;}

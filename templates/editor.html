@@ -2,14 +2,14 @@
 {% block content %}
     <h1>{% if doc_actual %}✏️ Editando: {{ doc_actual['titulo'] }}{% else %}📝 Redactar Nuevo Documento{% endif %}</h1>
 
-    <form method="POST" action="{{ url_for('main.editor') }}" style="background: var(--sidebar-bg); padding: 20px; border-radius: 8px;" id="formularioDocumento">
+    <form method="POST" action="{{ url_for('main.editor') }}" style="background: var(--sidebar-bg); padding: 20px; border-radius: 8px; width: 100%; box-sizing: border-box; overflow-x: hidden;" id="formularioDocumento">
         
         {% if doc_actual %}
             <input type="hidden" name="id_doc" value="{{ doc_actual['id'] }}">
         {% endif %}
 
         <label>Asignar a Proyecto:</label><br>
-        <select name="id_proyecto" required style="width: 100%; padding: 8px; margin: 10px 0;">
+        <select name="id_proyecto" required style="width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box;">
             {% for p in proyectos %}
                 <option value="{{ p['id'] }}" 
                     {% if doc_actual and p['id'] == doc_actual['id_proyecto'] %}selected{% endif %}>
@@ -21,17 +21,20 @@
         </select><br>
         
         <label>Título del Documento:</label><br>
-        <input type="text" name="titulo" required style="width: 97%; padding: 8px; margin: 10px 0;" 
+        <input type="text" name="titulo" required style="width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box;" 
                value="{% if doc_actual %}{{ doc_actual['titulo'] }}{% endif %}"><br>
 
         <label>Autor / Desarrollado por:</label><br>
-        <input type="text" name="autor" placeholder="Ej: Roberto Tejado" style="width: 97%; padding: 8px; margin: 10px 0;" 
+        <input type="text" name="autor" placeholder="Ej: Roberto Tejado" style="width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box;" 
                value="{% if doc_actual %}{{ doc_actual['autor'] or '' }}{% endif %}"><br>
         
         <label>Contenido del Documento:</label><br>
-        <textarea id="tinymce-editor" name="contenido_texto" rows="20" style="width: 100%;">
+        <!-- JAULA PARA TINYMCE REVISADA -->
+        <div style="width: 100%; display: block; margin-bottom: 15px; border-radius: 6px; box-sizing: border-box;">
+            <textarea id="tinymce-editor" name="contenido_texto" rows="20" style="width: 100%;">
 {% if doc_actual %}{{ doc_actual['contenido_texto'] | safe }}{% endif %}
-        </textarea><br>
+            </textarea>
+        </div><br>
         
       <button type="button" class="btn" onclick="enviarSeguro()" style="font-size: 16px; padding: 10px 20px;">
     {% if doc_actual %}Actualizar Documentación{% else %}Guardar Nueva Documentación{% endif %}
@@ -47,37 +50,30 @@ function enviarSeguro() {
     const editor = document.getElementById('tinymce-editor');
     const contenidoOriginal = editor.value;
 
-    // 2. Invertir el texto respetando los Emojis (¡El cambio clave para Firefox!)
+    // 2. Invertir el texto respetando los Emojis
     const contenidoInvertido = Array.from(contenidoOriginal).reverse().join("");
     
     // 3. Codificación robusta
-    // Usamos encodeURIComponent directamente para que btoa() trague acentos y símbolos
     const contenidoBase64 = btoa(encodeURIComponent(contenidoInvertido));
 
     // 4. Preparar el formulario para el backend y saltar el WAF
     const formulario = document.getElementById('formularioDocumento');
     
-    // Verificamos si existe el campo oculto 'd' que espera Python, si no, lo creamos
     let inputDisfrazado = document.getElementById('input_disfrazado_d');
     if (!inputDisfrazado) {
         inputDisfrazado = document.createElement('input');
         inputDisfrazado.type = 'hidden';
-        inputDisfrazado.name = 'd'; // Python hace: request.form.get('d')
+        inputDisfrazado.name = 'd'; 
         inputDisfrazado.id = 'input_disfrazado_d';
         formulario.appendChild(inputDisfrazado);
     }
     
-    // Metemos el contenido ofuscado en el campo 'd'
     inputDisfrazado.value = contenidoBase64;
 
-   // ¡VACIAR EL CAMPO ORIGINAL! 
     editor.value = '';
-    // ESTO ES CLAVE: Le quitamos el nombre para que el HTML crudo NO viaje a Python
     editor.removeAttribute('name'); 
 
     console.log("Contenido disfrazado, enviando...");
-    
-    // 5. Enviar el formulario
     formulario.submit();
 }
 </script>
@@ -86,17 +82,20 @@ function enviarSeguro() {
         {% endif %}
     </form>
 
-    <!--<script src="https://cdn.tiny.cloud/1/tsrsg1slvb6ev00jqizigk5fhdctocxsess5rzkwkz0q1ntv/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-  -->
-    
-<script>
-        // CONFIGURACIÓN UNIFICADA DE TINYMCE
+    <script>
+        // CONFIGURACIÓN UNIFICADA DE TINYMCE PARA LA WEB
         tinymce.init({
-            selector: '#tinymce-editor', // ID correcto corregido
-            plugins: 'codesample image code table lists link media',
-            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | codesample code | bullist numlist | link image table',
+            selector: '#tinymce-editor',
             
-            // Configuración de Lenguajes para CodeSample
+            // Dimensiones
+            height: 600,
+            width: '100%',
+            resize: 'vertical', // Permitimos estirar solo hacia abajo
+            
+            // Evitamos saltos al calcular botones
+            toolbar_mode: 'wrap',
+            
+            // Configuración de Lenguajes
             codesample_languages: [
                 { text: 'Bash', value: 'bash' },
                 { text: 'Docker', value: 'docker' },
@@ -110,20 +109,26 @@ function enviarSeguro() {
                 { text: 'CSS', value: 'css' }
             ],
 
-            // Configuraciones de imagen y visual
             images_upload_url: "/upload_attachment",
             automatic_uploads: true,
             file_picker_types: 'image',
-            height: 600,
-            menubar: false,
+            
+            language: 'es',
+            language_url: 'https://cdn.jsdelivr.net/npm/tinymce-i18n/langs6/es.min.js',
+            
+            plugins: 'codesample advlist autolink lists link image charmap preview searchreplace visualblocks code fullscreen table wordcount media',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | codesample image table link code fullscreen',
+            
+            menubar: true,
             extended_valid_elements: 'pre[*],code[*]',
             
-            // Modo Oscuro Dinámico
+            promotion: false,
+            branding: false,
+            
             skin: (document.documentElement.getAttribute('data-theme') === 'dark' ? 'oxide-dark' : 'oxide'),
             content_css: (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default')
         });
 
-        // Lógica para alternar Modo Claro/Oscuro
         function toggleTheme() {
             const html = document.documentElement;
             if (html.getAttribute('data-theme') === 'dark') {
@@ -131,30 +136,34 @@ function enviarSeguro() {
             } else {
                 html.setAttribute('data-theme', 'dark');
             }
-            // Recargar el editor para aplicar el nuevo tema (opcional)
             tinymce.remove('#tinymce-editor');
             location.reload(); 
         }
     </script>
+    
+    <!-- UN ÚNICO BLOQUE DE ESTILOS LIMPIO -->
+    <style>
+        /* EL HÉROE: Forzamos la barra de scroll vertical siempre visible en la página.
+           Al estar fija, abrir menús no hará que aparezca/desaparezca y empuje tu formulario */
+        html {
+            overflow-y: scroll !important;
+        }
+
+        /* Estilos estrictos para el contenedor principal del editor */
+        .tox-tinymce { 
+            width: 100% !important; 
+            box-sizing: border-box !important;
+            border-radius: 6px !important; 
+            margin-bottom: 15px;
+            /* Eliminamos el borde predeterminado para evitar cálculos extraños de ancho */
+            border: none !important;
+        }
+        
+        .tox-notifications-container { display: none !important; }
+    </style>
+    
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
     
-  <!--  <script>
-      tinymce.init({
-        selector: '#tinymce-editor',
-        plugins: 'image code table lists link media',
-        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code',
-        
-        images_upload_url: "{{ url_for('main.upload_attachment') }}",
-        automatic_uploads: true,
-        file_picker_types: 'image',
-        
-        height: 600,
-        menubar: false,
-        
-        skin: (document.documentElement.getAttribute('data-theme') === 'dark' ? 'oxide-dark' : 'oxide'),
-        content_css: (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default')
-      });
-    </script> --> 
 {% endblock %}
